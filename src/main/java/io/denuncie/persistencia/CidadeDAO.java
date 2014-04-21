@@ -42,6 +42,12 @@ public class CidadeDAO {
     public Cidade carregarPeloId(Long id) {
         return em.find(Cidade.class, id);
     }
+    
+    public List<Cidade> carregarPorEstado(String sigla) {
+        Query query = em.createQuery("FROM Cidade c WHERE c.estado.sigla = :sigla ORDER BY c.nome");
+        query = query.setParameter("sigla", sigla);
+        return query.getResultList();
+    }
 
     public void remover(Cidade cidade) throws Exception {
         try {
