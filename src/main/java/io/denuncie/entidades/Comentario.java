@@ -21,23 +21,12 @@ public class Comentario implements Serializable {
     private String comentario;
     @ManyToOne
     private Usuario usuario;
-    @ManyToOne
-    private Denuncia denuncia;
     private boolean inativo=false;
     private int reportado;
 
     public boolean isInativo() {
         return inativo;
     }
-
-    public Denuncia getDenuncia() {
-        return denuncia;
-    }
-
-    public void setDenuncia(Denuncia denuncia) {
-        this.denuncia = denuncia;
-    }
-    
 
     public void setInativo(boolean inativo) {
         this.inativo = inativo;

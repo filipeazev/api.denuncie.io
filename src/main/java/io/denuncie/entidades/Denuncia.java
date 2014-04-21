@@ -6,10 +6,13 @@ package io.denuncie.entidades;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -53,6 +56,8 @@ public class Denuncia implements Serializable {
     private boolean inativo = false;
     private int reportado;
     private String endereco;
+    @OneToMany(orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Comentario> comentarios;
 
     public Cidade getCidade() {
         return cidade;
@@ -168,4 +173,12 @@ public class Denuncia implements Serializable {
         this.reportado = reportado;
     }
 
+    public List<Comentario> getComentarios() {
+        return comentarios;
+    }
+
+    public void setComentarios(List<Comentario> comentarios) {
+        this.comentarios = comentarios;
+    }
+    
 }
