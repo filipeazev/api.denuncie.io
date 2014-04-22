@@ -20,10 +20,11 @@ import javax.persistence.TemporalType;
 public class Usuario implements Serializable {
     public Usuario(){
     }
-    public Usuario(String nome,String email,Date dataCadastro){
+    public Usuario(String nome,String email,Date dataCadastro, String senha){
         this.nome=nome;
         this.email=email;
         this.dataCadastro=dataCadastro;
+        this.senha=senha;
     }
     @Id
     @GeneratedValue

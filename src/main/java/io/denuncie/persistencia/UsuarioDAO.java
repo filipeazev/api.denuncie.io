@@ -6,6 +6,7 @@
 package io.denuncie.persistencia;
 
 import io.denuncie.entidades.Usuario;
+import io.denuncie.dto.UsuarioDTO;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -51,8 +52,8 @@ public class UsuarioDAO {
         }
     }
 
-    public List<Usuario> listarTodos() {
-        Query query = em.createQuery("FROM Usuario u ORDER BY u.nome");
+    public List<UsuarioDTO> listarTodos() {
+        Query query = em.createQuery("SELECT new io.denuncie.dto.UsuarioDTO (u) FROM Usuario u ORDER BY u.nome");
         return query.getResultList();
     }
 
