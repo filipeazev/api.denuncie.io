@@ -6,6 +6,7 @@
 
 package io.denuncie.persistencia;
 
+import io.denuncie.dto.DenunciaDTO;
 import io.denuncie.entidades.Cidade;
 import io.denuncie.entidades.Denuncia;
 import io.denuncie.entidades.Usuario;
@@ -53,20 +54,20 @@ public class DenunciaDAO {
         }
     }
     
-    public List<Denuncia> listarTodos() {
-        Query query = em.createQuery("FROM Denuncia d");
+    public List<DenunciaDTO> listarTodos() {
+        Query query = em.createQuery("SELECT new io.denuncie.dto.DenunciaDTO (d) FROM Denuncia d");
         return query.getResultList();
     }
     
-    public List<Denuncia> listarPorUsuario(Usuario usuario) {
-        Query query = em.createQuery("FROM Denuncia d WHERE d.usuario.id = :u");
+    public List<DenunciaDTO> listarPorUsuario(Usuario usuario) {
+        Query query = em.createQuery("SELECT new io.denuncie.dto.DenunciaDTO (d) FROM Denuncia d WHERE d.usuario.id = :u");
         query.setParameter("u", usuario.getId());
         return query.getResultList();
     }
     
     //Retorna ocorrências contendo <Cidade> no enderecoStr
-     public List<Denuncia> listarPorCidade(Cidade cidade) {
-        Query query = em.createQuery("FROM Denuncia d WHERE d.endereco LIKE :cidade");
+     public List<DenunciaDTO> listarPorCidade(Cidade cidade) {
+        Query query = em.createQuery("SELECT new io.denuncie.dto.DenunciaDTO (d) FROM Denuncia d WHERE d.endereco LIKE :cidade");
         query.setParameter("cidade", "%"+cidade.getNome()+"%");
         return query.getResultList();
     }
