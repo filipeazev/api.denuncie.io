@@ -6,7 +6,9 @@ package io.denuncie.ws;
 
 import com.google.gson.Gson;
 import io.denuncie.dto.DenunciaDTO;
+import io.denuncie.entidades.Comentario;
 import io.denuncie.entidades.Denuncia;
+import io.denuncie.persistencia.ComentarioDAO;
 import io.denuncie.persistencia.DenunciaDAO;
 import io.denuncie.util.Constantes;
 import java.util.List;
@@ -59,7 +61,31 @@ public class DenunciaRest {
         }
         return "{}";
     }
-
+    
+    @GET
+    @Path("{id}/comentarios")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getComentariosPorIdDenuncia(@PathParam("id") Long id) {
+        ComentarioDAO cDao = new ComentarioDAO(em);
+        List<Comentario> comentarios = cDao.listarPorDenuncia(id);
+        fecha();
+        return gson.toJson(comentarios);
+    }
+    
+    @GET
+    @Path("{id}/comentarios/{c_id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getComentariosPorIdDenuncia(@PathParam("id") Long id, @PathParam("c_id") Long cId) {
+        ComentarioDAO cDao = new ComentarioDAO(em);
+        Comentario comentario = cDao.carregarPeloId(cId);
+        if (comentario != null) {
+            String response = gson.toJson(comentario);
+            fecha();
+            return response;
+        }
+        return "{}";
+    }
+    
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     public Response postDenuncia(String content) {
