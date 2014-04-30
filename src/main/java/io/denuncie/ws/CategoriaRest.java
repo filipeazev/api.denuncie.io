@@ -23,13 +23,15 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import org.jboss.resteasy.core.ServerResponse;
+import org.jboss.resteasy.spi.interception.PostProcessInterceptor;
 
 /**
  *
  * @author Filipe
  */
 @Path("/categorias")
-public class CategoriaRest {
+public class CategoriaRest implements PostProcessInterceptor {
 
     EntityManagerFactory emf = Persistence.createEntityManagerFactory(Constantes.PU);
     EntityManager em = emf.createEntityManager();
@@ -42,7 +44,6 @@ public class CategoriaRest {
     @Produces(MediaType.APPLICATION_JSON)
     public String getCategorias() {
         List<Categoria> categorias = dao.listarTodos();
-        fecha();
         return gson.toJson(categorias);
     }
 
@@ -51,7 +52,6 @@ public class CategoriaRest {
     @Produces(MediaType.APPLICATION_JSON)
     public String getCategoriaPorId(@PathParam("id") Long id) {
         Categoria categoria = dao.carregarPeloId(id);
-        fecha();
         return gson.toJson(categoria);
     }
 
@@ -63,7 +63,6 @@ public class CategoriaRest {
             tx.begin();
             dao.persiste(categoria);
             tx.commit();
-            fecha();
         } catch (Exception ex) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
@@ -81,7 +80,6 @@ public class CategoriaRest {
             tx.begin();
             dao.salvar(categoria);
             tx.commit();
-            fecha();
         } catch (Exception ex) {
             System.out.println(content);
             return Response.status(Response.Status.BAD_REQUEST).build();
@@ -98,14 +96,14 @@ public class CategoriaRest {
             tx.begin();
             dao.remover(categoria);
             tx.commit();
-            fecha();
         } catch (Exception ex) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
         return Response.status(Response.Status.OK).build();
     }
 
-    public void fecha() {
+    @Override
+    public void postProcess(ServerResponse sr) {
         em.close();
         emf.close();
     }

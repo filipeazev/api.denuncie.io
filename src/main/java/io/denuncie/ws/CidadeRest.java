@@ -21,13 +21,15 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import org.jboss.resteasy.core.ServerResponse;
+import org.jboss.resteasy.spi.interception.PostProcessInterceptor;
 
 /**
  *
  * @author Filipe
  */
 @Path("/cidades")
-public class CidadeRest {
+public class CidadeRest implements PostProcessInterceptor {
 
     EntityManagerFactory emf = Persistence.createEntityManagerFactory(Constantes.PU);
     EntityManager em = emf.createEntityManager();
@@ -40,7 +42,6 @@ public class CidadeRest {
     @Produces(MediaType.APPLICATION_JSON)
     public String getCidades() {
         List<Cidade> cidades = dao.listarTodos();
-        fecha();
         return gson.toJson(cidades);
     }
 
@@ -49,16 +50,14 @@ public class CidadeRest {
     @Produces(MediaType.APPLICATION_JSON)
     public String getCidadePorId(@PathParam("id") Long id) {
         Cidade cidade = dao.carregarPeloId(id);
-        fecha();
         return gson.toJson(cidade);
     }
-    
+
     @GET
     @Path("/estado/{sigla}")
     @Produces(MediaType.APPLICATION_JSON)
     public String getCidadePorEstado(@PathParam("sigla") String sigla) {
         List<Cidade> cidades = dao.carregarPorEstado(sigla.toUpperCase());
-        fecha();
         return gson.toJson(cidades);
     }
 
@@ -74,7 +73,6 @@ public class CidadeRest {
             } else {
                 return Response.status(Response.Status.BAD_REQUEST).build();
             }
-            fecha();
         } catch (Exception ex) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
@@ -82,9 +80,8 @@ public class CidadeRest {
         return Response.status(Response.Status.OK).build();
     }
 
-   
-
-    public void fecha() {
+    @Override
+    public void postProcess(ServerResponse sr) {
         em.close();
         emf.close();
     }

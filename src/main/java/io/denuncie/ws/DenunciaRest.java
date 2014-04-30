@@ -5,11 +5,13 @@
 package io.denuncie.ws;
 
 import com.google.gson.Gson;
+import io.denuncie.dto.ComentarioDTO;
 import io.denuncie.dto.DenunciaDTO;
 import io.denuncie.entidades.Comentario;
 import io.denuncie.entidades.Denuncia;
 import io.denuncie.persistencia.ComentarioDAO;
 import io.denuncie.persistencia.DenunciaDAO;
+import io.denuncie.persistencia.UsuarioDAO;
 import io.denuncie.util.Constantes;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -26,26 +28,27 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import org.jboss.resteasy.core.ServerResponse;
+import org.jboss.resteasy.spi.interception.PostProcessInterceptor;
 
 /**
  *
  * @author Filipe
  */
 @Path("/denuncias")
-public class DenunciaRest {
+public class DenunciaRest implements PostProcessInterceptor {
 
     EntityManagerFactory emf = Persistence.createEntityManagerFactory(Constantes.PU);
     EntityManager em = emf.createEntityManager();
     EntityTransaction tx = em.getTransaction();
     DenunciaDAO dao = new DenunciaDAO(em);
-
+    ComentarioDAO cDao = new ComentarioDAO(em);
     Gson gson = new Gson();
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public String getDenuncias() {
         List<DenunciaDTO> denuncias = dao.listarTodos();
-        fecha();
         return gson.toJson(denuncias);
     }
 
@@ -56,36 +59,11 @@ public class DenunciaRest {
         Denuncia denuncia = dao.carregarPeloId(id);
         if (denuncia != null) {
             String response = gson.toJson(new DenunciaDTO(denuncia));
-            fecha();
             return response;
         }
         return "{}";
     }
-    
-    @GET
-    @Path("{id}/comentarios")
-    @Produces(MediaType.APPLICATION_JSON)
-    public String getComentariosPorIdDenuncia(@PathParam("id") Long id) {
-        ComentarioDAO cDao = new ComentarioDAO(em);
-        List<Comentario> comentarios = cDao.listarPorDenuncia(id);
-        fecha();
-        return gson.toJson(comentarios);
-    }
-    
-    @GET
-    @Path("{id}/comentarios/{c_id}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public String getComentariosPorIdDenuncia(@PathParam("id") Long id, @PathParam("c_id") Long cId) {
-        ComentarioDAO cDao = new ComentarioDAO(em);
-        Comentario comentario = cDao.carregarPeloId(cId);
-        if (comentario != null) {
-            String response = gson.toJson(comentario);
-            fecha();
-            return response;
-        }
-        return "{}";
-    }
-    
+
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     public Response postDenuncia(String content) {
@@ -94,7 +72,6 @@ public class DenunciaRest {
             tx.begin();
             dao.persiste(denuncia);
             tx.commit();
-            fecha();
         } catch (Exception ex) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
@@ -113,7 +90,6 @@ public class DenunciaRest {
             tx.begin();
             dao.salvar(denuncia);
             tx.commit();
-            fecha();
         } catch (Exception ex) {
             System.out.println(content);
             return Response.status(Response.Status.BAD_REQUEST).build();
@@ -131,15 +107,94 @@ public class DenunciaRest {
             tx.begin();
             dao.salvar(denuncia);
             tx.commit();
-            fecha();
         } catch (Exception ex) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
         return Response.status(Response.Status.OK).build();
     }
 
-    public void fecha() {
+    //COMENTÁRIOS
+    @GET
+    @Path("{id}/comentarios")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getComentariosPorIdDenuncia(@PathParam("id") Long id) {
+        List<ComentarioDTO> comentarios = cDao.listarPorDenuncia(id);
+        return gson.toJson(comentarios);
+    }
+
+    @GET
+    @Path("{id}/comentarios/{c_id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getComentariosPorId(@PathParam("c_id") Long id) {
+        Comentario comentario = cDao.carregarPeloId(id);
+        if (comentario != null) {
+            String response = gson.toJson(new ComentarioDTO(comentario));
+            return response;
+        }
+        return "{}";
+    }
+    
+    @POST
+    @Path("{id}/comentarios")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response postComentario(String content) {
+        try {
+            UsuarioDAO uDao = new UsuarioDAO(em);
+            ComentarioDTO comentarioDTO = gson.fromJson(content, ComentarioDTO.class);
+            Comentario comentario = new Comentario(
+                    comentarioDTO.getComentario(), 
+                    uDao.carregarPeloId(comentarioDTO.getUsuario_id()), 
+                    dao.carregarPeloId(comentarioDTO.getDenuncia_id()));
+            tx.begin();
+            cDao.persiste(comentario);
+            tx.commit();
+        } catch (Exception ex) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+        System.out.println(content);
+        return Response.status(Response.Status.OK).build();
+    }
+
+    @PUT
+    @Path("{id}/comentarios")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response putComentario(String content) {
+        try {
+            ComentarioDTO update = gson.fromJson(content, ComentarioDTO.class);
+            Comentario comentario = cDao.carregarPeloId(update.getId());
+            comentario.setComentario(update.getComentario());
+            comentario.setInativo(update.isInativo());
+            comentario.setReportado(update.getReportado());
+            tx.begin();
+            cDao.salvar(comentario);
+            tx.commit();
+        } catch (Exception ex) {
+            System.out.println(content);
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+        System.out.println(content);
+        return Response.status(Response.Status.OK).build();
+    }
+
+    @DELETE
+    @Path("{id}/comentarios/{c_id}")
+    public Response deleteComentario(@PathParam("c_id") Long id) {
+        try {
+            Comentario comentario = cDao.carregarPeloId(id);
+            comentario.setInativo(true);
+            tx.begin();
+            cDao.salvar(comentario);
+            tx.commit();
+        } catch (Exception ex) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+        return Response.status(Response.Status.OK).build();
+    }
+
+    @Override
+    public void postProcess(ServerResponse sr) {
         em.close();
         emf.close();
     }
+
 }

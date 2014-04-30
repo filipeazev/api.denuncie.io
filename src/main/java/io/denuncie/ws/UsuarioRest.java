@@ -26,13 +26,15 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import org.jboss.resteasy.core.ServerResponse;
+import org.jboss.resteasy.spi.interception.PostProcessInterceptor;
 
 /**
  *
  * @author Filipe
  */
 @Path("/usuarios")
-public class UsuarioRest {
+public class UsuarioRest implements PostProcessInterceptor {
 
     EntityManagerFactory emf = Persistence.createEntityManagerFactory(Constantes.PU);
     EntityManager em = emf.createEntityManager();
@@ -45,7 +47,6 @@ public class UsuarioRest {
     @Produces(MediaType.APPLICATION_JSON)
     public String getUsuarios() {
         List<UsuarioDTO> usuarios = dao.listarTodos();
-        fecha();
         return gson.toJson(usuarios);
     }
 
@@ -54,8 +55,7 @@ public class UsuarioRest {
     @Produces(MediaType.APPLICATION_JSON)
     public String getUsuarioPorId(@PathParam("id") Long id) {
         Usuario usuario = dao.carregarPeloId(id);
-        fecha();
-        if(usuario!=null){
+        if (usuario != null) {
             return gson.toJson(new UsuarioDTO(usuario));
         }
         return "{}";
@@ -71,7 +71,6 @@ public class UsuarioRest {
             tx.begin();
             dao.persiste(usuario);
             tx.commit();
-            fecha();
         } catch (Exception ex) {
             return Response.status(Response.Status.BAD_REQUEST).entity(ex.getMessage()).build();
         }
@@ -85,14 +84,13 @@ public class UsuarioRest {
         try {
             Usuario update = gson.fromJson(content, Usuario.class);
             Usuario usuario = dao.carregarPeloId(update.getId());
-            if(usuario!=null){
+            if (usuario != null) {
                 usuario.setNome(update.getNome());
                 usuario.setEmail(update.getEmail());
                 usuario.setSenha(update.getSenha());
                 tx.begin();
                 dao.salvar(usuario);
                 tx.commit();
-                fecha();
             } else {
                 return Response.status(Response.Status.BAD_REQUEST).build();
             }
@@ -112,14 +110,14 @@ public class UsuarioRest {
             tx.begin();
             dao.remover(usuario);
             tx.commit();
-            fecha();
         } catch (Exception ex) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
         return Response.status(Response.Status.OK).build();
     }
 
-    public void fecha() {
+    @Override
+    public void postProcess(ServerResponse sr) {
         em.close();
         emf.close();
     }

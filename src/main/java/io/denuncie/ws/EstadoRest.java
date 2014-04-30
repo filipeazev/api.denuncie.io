@@ -17,13 +17,15 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import org.jboss.resteasy.core.ServerResponse;
+import org.jboss.resteasy.spi.interception.PostProcessInterceptor;
 
 /**
  *
  * @author Filipe
  */
 @Path("/estados")
-public class EstadoRest {
+public class EstadoRest implements PostProcessInterceptor {
 
     EntityManagerFactory emf = Persistence.createEntityManagerFactory(Constantes.PU);
     EntityManager em = emf.createEntityManager();
@@ -35,7 +37,6 @@ public class EstadoRest {
     @Produces(MediaType.APPLICATION_JSON)
     public String getEstados() {
         List<Estado> estados = dao.listarTodos();
-        fecha();
         return gson.toJson(estados);
     }
 
@@ -44,11 +45,11 @@ public class EstadoRest {
     @Produces(MediaType.APPLICATION_JSON)
     public String getEstadoPorId(@PathParam("id") Long id) {
         Estado estado = dao.carregarPeloId(id);
-        fecha();
         return gson.toJson(estado);
     }
 
-    public void fecha() {
+    @Override
+    public void postProcess(ServerResponse sr) {
         em.close();
         emf.close();
     }

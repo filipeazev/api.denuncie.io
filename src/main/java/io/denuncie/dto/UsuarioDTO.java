@@ -7,13 +7,14 @@
 package io.denuncie.dto;
 
 import io.denuncie.entidades.Usuario;
+import java.io.Serializable;
 import java.util.Date;
 
 /**
  *
  * @author filipe.azevedo
  */
-public class UsuarioDTO {
+public class UsuarioDTO implements Serializable {
     
     private Long id;
     private String nome;

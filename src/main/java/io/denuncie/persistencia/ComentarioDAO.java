@@ -6,6 +6,7 @@
 
 package io.denuncie.persistencia;
 
+import io.denuncie.dto.ComentarioDTO;
 import io.denuncie.entidades.Comentario;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -51,8 +52,8 @@ public class ComentarioDAO {
         }
     }
     
-    public List<Comentario> listarPorDenuncia(Long idDenuncia) {
-        Query query = em.createQuery("FROM Comentario c WHERE c.denuncia.id = :id");
+    public List<ComentarioDTO> listarPorDenuncia(Long idDenuncia) {
+        Query query = em.createQuery("SELECT NEW io.denuncie.dto.ComentarioDTO(c) FROM Comentario c WHERE c.denuncia.id = :id");
         query=query.setParameter("id", idDenuncia);
         return query.getResultList();
     }

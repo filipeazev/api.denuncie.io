@@ -7,6 +7,7 @@ package io.denuncie.entidades;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -56,7 +57,7 @@ public class Denuncia implements Serializable {
     private boolean inativo = false;
     private int reportado;
     private String endereco;
-    @OneToMany(orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "denuncia", orphanRemoval = true,  fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Comentario> comentarios;
 
     public Cidade getCidade() {
@@ -66,8 +67,6 @@ public class Denuncia implements Serializable {
     public void setCidade(Cidade cidade) {
         this.cidade = cidade;
     }
-    
-    
     
     public String getEndereco() {
         return endereco;
