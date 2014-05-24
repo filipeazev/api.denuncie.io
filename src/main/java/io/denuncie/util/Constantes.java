@@ -11,7 +11,10 @@ package io.denuncie.util;
  * @author filipe.azevedo
  */
 public class Constantes {
-    
+    /*Desenvolvimento*/
     public static final String PU = "denunciePU";
+    /*Produção*/
+    //public static final String PU = "primary";
+    public static final String TESTESPU = "testeJavaDBPU";
     
 }
