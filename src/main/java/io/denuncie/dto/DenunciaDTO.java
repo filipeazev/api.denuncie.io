@@ -14,7 +14,6 @@ import java.util.Date;
  */
 public class DenunciaDTO implements Serializable {
 
-
     public DenunciaDTO(Denuncia d) {
         this.id = d.getId();
         this.descricao = d.getDescricao();
@@ -30,7 +29,9 @@ public class DenunciaDTO implements Serializable {
         this.inativo = d.isInativo();
         this.reportado = d.getReportado();
         this.endereco = d.getEndereco();
-        this.qtdcomentarios = d.getComentarios().size();
+        if(d.getComentarios()!=null){
+            this.qtdcomentarios = d.getComentarios().size();
+        }
     }
     private Long id;
     private String descricao;

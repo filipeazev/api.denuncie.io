@@ -26,7 +26,19 @@ public class Denuncia implements Serializable {
 
     public Denuncia() {
     }
-
+    
+    public Denuncia(String descricao, double latitude, double longitude, Date dataCadastro, String imagem, Cidade cidade, Categoria categoria, Usuario usuario, String endereco) {
+        this.descricao = descricao;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.dataCadastro = dataCadastro;
+        this.imagem = imagem;
+        this.categoria = categoria;
+        this.usuario = usuario;
+        this.endereco=endereco;
+        this.cidade=cidade;
+    }
+    
     public Denuncia(String descricao, double latitude, double longitude, Date dataCadastro, String imagem, Categoria categoria, Usuario usuario, String endereco) {
         this.descricao = descricao;
         this.latitude = latitude;
