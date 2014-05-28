@@ -9,10 +9,13 @@ import io.denuncie.dto.ComentarioDTO;
 import io.denuncie.dto.DenunciaDTO;
 import io.denuncie.entidades.Comentario;
 import io.denuncie.entidades.Denuncia;
+import io.denuncie.persistencia.CategoriaDAO;
+import io.denuncie.persistencia.CidadeDAO;
 import io.denuncie.persistencia.ComentarioDAO;
 import io.denuncie.persistencia.DenunciaDAO;
 import io.denuncie.persistencia.UsuarioDAO;
 import io.denuncie.util.Constantes;
+import java.util.Date;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -43,6 +46,9 @@ public class DenunciaRest implements PostProcessInterceptor {
     EntityTransaction tx = em.getTransaction();
     DenunciaDAO dao = new DenunciaDAO(em);
     ComentarioDAO cDao = new ComentarioDAO(em);
+    UsuarioDAO uDao = new UsuarioDAO(em);
+    CidadeDAO cidadeDao = new CidadeDAO(em);
+    CategoriaDAO categoriaDao = new CategoriaDAO(em);
     Gson gson = new Gson();
 
     @GET
@@ -68,7 +74,17 @@ public class DenunciaRest implements PostProcessInterceptor {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response postDenuncia(String content) {
         try {
-            Denuncia denuncia = gson.fromJson(content, Denuncia.class);
+            DenunciaDTO denunciaDTO = gson.fromJson(content, DenunciaDTO.class);
+            Denuncia denuncia = new Denuncia(
+                    denunciaDTO.getDescricao(), 
+                    denunciaDTO.getLatitude(), 
+                    denunciaDTO.getLongitude(), 
+                    new Date(), 
+                    denunciaDTO.getImagem(), 
+                    cidadeDao.carregarPeloId(denunciaDTO.getCidade()), 
+                    categoriaDao.carregarPeloId(denunciaDTO.getCategoria()), 
+                    uDao.carregarPeloId(denunciaDTO.getUsuario()), 
+                    denunciaDTO.getEndereco());
             tx.begin();
             dao.persiste(denuncia);
             tx.commit();
@@ -139,7 +155,6 @@ public class DenunciaRest implements PostProcessInterceptor {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response postComentario(String content) {
         try {
-            UsuarioDAO uDao = new UsuarioDAO(em);
             ComentarioDTO comentarioDTO = gson.fromJson(content, ComentarioDTO.class);
             Comentario comentario = new Comentario(
                     comentarioDTO.getComentario(), 
