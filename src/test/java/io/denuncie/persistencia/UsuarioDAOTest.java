@@ -62,6 +62,7 @@ public class UsuarioDAOTest {
      */
     @Test
     public void testListarTodos() throws Exception {
+        limpar();
         tx.begin();
         Usuario usuario1 = new Usuario("Teste usuario1", "teste1@email.com", new Date(), "123456");
         Usuario usuario2 = new Usuario("Teste usuario2", "teste2@email.com", new Date(), "123456");
@@ -141,6 +142,19 @@ public class UsuarioDAOTest {
         dao.remover(usuario);
         tx.commit();
         assertFalse("O objeto ainda persiste", em.contains(usuario));
+    }
+    
+    public void limpar() throws Exception {
+        List<UsuarioDTO> todos = dao.listarTodos();
+        Usuario temp;
+        if (!todos.isEmpty()) {
+            tx.begin();
+            for (UsuarioDTO t : todos) {
+                temp = dao.carregarPeloId(t.getId());
+                dao.remover(temp);
+            }
+            tx.commit();
+        }
     }
 
 }
